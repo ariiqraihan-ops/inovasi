@@ -9,10 +9,9 @@ const STOP = new Set([
   "angka","undang","peraturan","ketentuan","umum","sebesar","persen","sampai",
   "berupa","melalui","setelah","sejak","apabila","berdasarkan","seluruh","semua",
   "beberapa","suatu","dimana","ketika","masing","perlu","wajib","harus","boleh",
-  "tetap","pasal","lain","pihak","paling","lambat","saat","masa","jika","maka"
+  "tetap","pasal","lain","pihak","lambat","saat","masa","jika","maka"
 ]);
 
-// ── ISTILAH PENTING PERBANKAN & LPS ──────────────────────────────────────────
 const ISTILAH = [
   "simpanan","nasabah","penyimpan","bank","penjaminan","lps","premi","klaim",
   "deposito","giro","tabungan","sertifikat","bunga","modal","izin","usaha",
@@ -21,22 +20,16 @@ const ISTILAH = [
   "asing","rupiah","agunan","kredit","denda","keterlambatan","sanksi","pembayaran",
   "pengalihan","aset","kewajiban","penggabungan","peleburan","pengambilalihan",
   "penyertaan","stabilitas","perbankan","keuangan","periode","koreksi","pelaporan",
-  "bersama","tindak","pidana","pembukuan","pengumuman","tingkat","fasilitas",
-  "layanan","produk","transaksi","dana","investasi","portofolio","risiko",
-  "kepatuhan","tata","kelola","audit","pengawasan","otoritas","regulator"
+  "tindak","pidana","pembukuan","pengumuman","tingkat","layanan","transaksi",
+  "dana","risiko","kepatuhan","tata","kelola","audit","pengawasan","otoritas"
 ];
 
-// ── AUTO EKSTRAK KATA KUNCI ───────────────────────────────────────────────────
 function ekstrakKataKunci(isi, judul) {
   const teks = ((judul || "") + " " + (isi || "")).toLowerCase();
   const hasil = new Set();
-
-  // 1. Cocokkan istilah penting
   for (const ist of ISTILAH) {
     if (teks.includes(ist)) hasil.add(ist);
   }
-
-  // 2. Kata yang muncul ≥2x dan bukan stop word
   const kata = teks.match(/\b[a-z]{4,}\b/g) || [];
   const freq = {};
   for (const k of kata) {
@@ -45,37 +38,29 @@ function ekstrakKataKunci(isi, judul) {
   for (const [k, f] of Object.entries(freq)) {
     if (f >= 2) hasil.add(k);
   }
-
-  // 3. Semua kata dari judul pasal (selalu relevan)
   const judulKata = (judul || "").toLowerCase().match(/\b[a-z]{4,}\b/g) || [];
   for (const k of judulKata) {
     if (!STOP.has(k)) hasil.add(k);
   }
-
   return [...hasil].slice(0, 20);
 }
 
-// ── MUAT DATABASE DARI peraturan.json ────────────────────────────────────────
+// ── MUAT DATABASE ─────────────────────────────────────────────────────────────
 let DB = null;
 
 async function muatDB() {
   if (DB) return DB;
-
   try {
-    // Coba baca dari file lokal (Netlify Functions bisa akses public/)
     const path = new URL("../../public/peraturan.json", import.meta.url);
     const res  = await fetch(path);
     const json = await res.json();
-
-    // Support 2 format: { pasal: [...] } atau { peraturan: [...] }
     let semuaPasal = [];
 
     if (json.pasal) {
-      // Format hasil Apps Script: { pasal: [{id, pasal, judul_pasal, isi, ...}] }
       semuaPasal = json.pasal.map(p => ({
         id             : p.id || `P-${Math.random().toString(36).slice(2)}`,
         id_peraturan   : p.id_peraturan || p.id?.split('-P')[0] || "UNKNOWN",
-        judul_peraturan: p.judul_peraturan || p.id_peraturan || p.id?.split('-P')[0] || "Peraturan LPS",
+        judul_peraturan: p.judul_peraturan || p.id_peraturan || "Peraturan LPS",
         singkatan      : p.singkatan || p.id_peraturan || "",
         level          : p.level || "Peraturan LPS",
         pasal          : p.pasal || "",
@@ -83,9 +68,7 @@ async function muatDB() {
         isi            : p.isi || "",
         kata_kunci     : p.kata_kunci?.length ? p.kata_kunci : ekstrakKataKunci(p.isi, p.judul_pasal)
       }));
-
     } else if (json.peraturan) {
-      // Format lama: { peraturan: [{id, judul, pasal: [...]}] }
       for (const per of json.peraturan) {
         for (const p of per.pasal) {
           semuaPasal.push({
@@ -105,48 +88,31 @@ async function muatDB() {
 
     DB = semuaPasal;
     return DB;
-
   } catch (err) {
     console.error("Gagal muat DB:", err);
     return [];
   }
 }
 
-// ── SCORING RELEVANSI ─────────────────────────────────────────────────────────
+// ── SCORING ───────────────────────────────────────────────────────────────────
 function skorRelevansi(pasal, query) {
   const q    = query.toLowerCase();
   const kata = new Set((q.match(/\b\w{4,}\b/g) || []));
   let skor   = 0;
-
-  // Cocok kata kunci (bobot 3)
   for (const k of pasal.kata_kunci) {
     if (q.includes(k.toLowerCase())) skor += 3;
   }
-
-  // Cocok isi (bobot 1.5)
   const isiL = pasal.isi.toLowerCase();
-  for (const k of kata) {
-    if (isiL.includes(k)) skor += 1.5;
-  }
-
-  // Cocok judul pasal (bobot 4)
+  for (const k of kata) { if (isiL.includes(k)) skor += 1.5; }
   const judulL = (pasal.judul_pasal || "").toLowerCase();
-  for (const k of kata) {
-    if (judulL.includes(k)) skor += 4;
-  }
-
-  // Cocok judul peraturan (bobot 2)
+  for (const k of kata) { if (judulL.includes(k)) skor += 4; }
   const perL = (pasal.judul_peraturan || "").toLowerCase();
-  for (const k of kata) {
-    if (perL.includes(k)) skor += 2;
-  }
-
+  for (const k of kata) { if (perL.includes(k)) skor += 2; }
   return Math.round(skor * 10) / 10;
 }
 
 function cariPasal(query, topN = 6) {
   if (!DB?.length) return [];
-
   return DB
     .map(p => ({ ...p, skor: skorRelevansi(p, query) }))
     .filter(p => p.skor > 0)
@@ -191,18 +157,52 @@ Bahasa respons: Indonesia formal.`,
 
 Jawab pertanyaan berdasarkan konteks peraturan yang diberikan dengan:
 - Jawaban langsung dan jelas
-- Menyebut nomor pasal dan nama peraturan yang menjadi sumber
-- Penjelasan praktis/implikasi jika relevan
-- Jika informasi tidak tersedia, nyatakan dengan jelas
+- Menyebut nomor pasal dan nama peraturan sumber
+- Penjelasan praktis jika relevan
+- Jika tidak tersedia dalam konteks, nyatakan dengan jelas
 
 Bahasa respons: Indonesia.`
 };
 
+// ── GEMINI API ────────────────────────────────────────────────────────────────
+async function panggilGemini(sistemPrompt, userPrompt, apiKey) {
+  // Gabungkan sistem prompt ke dalam pesan user (Gemini tidak punya system role terpisah)
+  const gabungan = sistemPrompt + "\n\n" + userPrompt;
+
+  const url = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=${apiKey}`;
+
+  const res = await fetch(url, {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({
+      contents: [{
+        role: "user",
+        parts: [{ text: gabungan }]
+      }],
+      generationConfig: {
+        temperature    : 0.3,
+        maxOutputTokens: 2048
+      }
+    })
+  });
+
+  const data = await res.json();
+
+  if (!res.ok) {
+    const msg = data.error?.message || JSON.stringify(data);
+    throw new Error(msg);
+  }
+
+  const teks = data.candidates?.[0]?.content?.parts?.[0]?.text;
+  if (!teks) throw new Error("Gemini tidak mengembalikan respons.");
+  return teks;
+}
+
 // ── NETLIFY HANDLER ───────────────────────────────────────────────────────────
 export const handler = async (event) => {
   const headers = {
-    "Content-Type": "application/json",
-    "Access-Control-Allow-Origin": "*",
+    "Content-Type"                : "application/json",
+    "Access-Control-Allow-Origin" : "*",
     "Access-Control-Allow-Headers": "Content-Type",
     "Access-Control-Allow-Methods": "POST, OPTIONS"
   };
@@ -210,10 +210,10 @@ export const handler = async (event) => {
   if (event.httpMethod === "OPTIONS") return { statusCode: 200, headers };
   if (event.httpMethod !== "POST")    return { statusCode: 405, body: "Method Not Allowed" };
 
-  const apiKey = process.env.ANTHROPIC_API_KEY;
+  const apiKey = process.env.GEMINI_API_KEY;
   if (!apiKey) return {
     statusCode: 500, headers,
-    body: JSON.stringify({ error: "ANTHROPIC_API_KEY belum dikonfigurasi di Netlify." })
+    body: JSON.stringify({ error: "GEMINI_API_KEY belum dikonfigurasi di Netlify Environment Variables." })
   };
 
   let body;
@@ -226,7 +226,6 @@ export const handler = async (event) => {
     body: JSON.stringify({ error: "Teks dan mode diperlukan." })
   };
 
-  // Muat DB & cari pasal relevan
   const db    = await muatDB();
   const pasal = cariPasal(teks, 6);
 
@@ -252,38 +251,20 @@ export const handler = async (event) => {
   }[mode];
 
   try {
-    const res = await fetch("https://api.anthropic.com/v1/messages", {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-        "x-api-key": apiKey,
-        "anthropic-version": "2023-06-01"
-      },
-      body: JSON.stringify({
-        model      : "claude-sonnet-4-6",
-        max_tokens : 2048,
-        system     : PROMPTS[mode],
-        messages   : [{ role: "user", content: promptUser }]
-      })
-    });
-
-    const data = await res.json();
-    if (!res.ok) throw new Error(data.error?.message || "API error");
-
+    const respons = await panggilGemini(PROMPTS[mode], promptUser, apiKey);
     return {
       statusCode: 200, headers,
       body: JSON.stringify({
-        respons             : data.content[0].text,
-        referensi           : pasal,
-        total_pasal_dicari  : db.length,
-        info_database       : `Database: ${db.length} pasal aktif`
+        respons,
+        referensi          : pasal,
+        total_pasal_dicari : db.length,
+        info_database      : `Database: ${db.length} pasal aktif · Ditenagai Gemini AI`
       })
     };
-
   } catch (err) {
     return {
       statusCode: 500, headers,
-      body: JSON.stringify({ error: "Error AI: " + err.message })
+      body: JSON.stringify({ error: "Error Gemini AI: " + err.message })
     };
   }
 };
