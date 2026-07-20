@@ -1,192 +1,258 @@
-const PERATURAN_LPS = [
-  {
-    id: "PLPS-001",
-    judul: "Peraturan LPS Nomor 1 Tahun 2023 tentang Penjaminan Simpanan",
-    level: "Peraturan Utama",
-    pasal: "Pasal 1",
-    isi: "Lembaga Penjamin Simpanan, yang selanjutnya disebut LPS, adalah lembaga yang berfungsi menjamin simpanan nasabah penyimpan dan turut aktif dalam memelihara stabilitas sistem perbankan sesuai dengan kewenangannya.",
-    kata_kunci: ["LPS", "penjaminan", "simpanan", "nasabah", "perbankan"]
-  },
-  {
-    id: "PLPS-002",
-    judul: "Peraturan LPS Nomor 1 Tahun 2023 tentang Penjaminan Simpanan",
-    level: "Peraturan Utama",
-    pasal: "Pasal 2",
-    isi: "Simpanan yang dijamin LPS meliputi giro, deposito, sertifikat deposito, tabungan, dan atau bentuk lain yang dipersamakan dengan itu. Nilai simpanan yang dijamin LPS sampai dengan Rp 2.000.000.000 (dua miliar rupiah) per nasabah per bank.",
-    kata_kunci: ["simpanan", "giro", "deposito", "tabungan", "nilai jaminan"]
-  },
-  {
-    id: "PLPS-003",
-    judul: "Peraturan LPS Nomor 2 Tahun 2023 tentang Premi Penjaminan",
-    level: "Peraturan Utama",
-    pasal: "Pasal 1",
-    isi: "Premi penjaminan adalah iuran yang wajib dibayar oleh setiap bank peserta penjaminan kepada LPS. Premi dibayarkan setiap 6 (enam) bulan sekali, yaitu pada bulan Januari dan Juli.",
-    kata_kunci: ["premi", "iuran", "bank peserta", "penjaminan"]
-  },
-  {
-    id: "PLPS-004",
-    judul: "Peraturan LPS Nomor 2 Tahun 2023 tentang Premi Penjaminan",
-    level: "Peraturan Utama",
-    pasal: "Pasal 2",
-    isi: "Besaran premi penjaminan ditetapkan sebesar 0,1% (nol koma satu persen) per periode dari rata-rata saldo simpanan dalam setiap periode. Bank yang terlambat membayar premi dikenakan denda sebesar 2% per bulan dari jumlah premi yang terutang.",
-    kata_kunci: ["premi", "besaran", "saldo simpanan", "denda", "keterlambatan"]
-  },
-  {
-    id: "PLPS-005",
-    judul: "Peraturan LPS Nomor 3 Tahun 2023 tentang Resolusi Bank",
-    level: "Peraturan Utama",
-    pasal: "Pasal 1",
-    isi: "Resolusi bank adalah serangkaian tindakan yang dilakukan LPS terhadap bank gagal yang meliputi penyelamatan atau pencabutan izin usaha bank. LPS memiliki kewenangan untuk mengambil keputusan resolusi dalam waktu paling lambat 90 hari kerja.",
-    kata_kunci: ["resolusi", "bank gagal", "penyelamatan", "pencabutan izin"]
-  },
-  {
-    id: "PLPS-006",
-    judul: "Peraturan LPS Nomor 3 Tahun 2023 tentang Resolusi Bank",
-    level: "Peraturan Utama",
-    pasal: "Pasal 3",
-    isi: "Dalam melakukan penyelamatan bank gagal, LPS dapat melakukan: (a) penyertaan modal sementara; (b) pengalihan sebagian atau seluruh aset dan kewajiban bank; (c) penggabungan atau peleburan bank; (d) pengambilalihan bank oleh LPS.",
-    kata_kunci: ["penyelamatan", "penyertaan modal", "pengalihan aset", "penggabungan bank"]
-  },
-  {
-    id: "PLPS-007",
-    judul: "Peraturan Dewan Komisioner LPS Nomor 5 Tahun 2023 tentang Tata Cara Pembayaran Klaim",
-    level: "Peraturan Turunan",
-    pasal: "Pasal 1",
-    isi: "Klaim penjaminan adalah hak nasabah penyimpan untuk memperoleh pembayaran dari LPS atas simpanannya yang dijamin. Nasabah dapat mengajukan klaim dalam jangka waktu 5 (lima) tahun sejak bank dicabut izin usahanya.",
-    kata_kunci: ["klaim", "nasabah penyimpan", "pembayaran", "jangka waktu"]
-  },
-  {
-    id: "PLPS-008",
-    judul: "Peraturan Dewan Komisioner LPS Nomor 5 Tahun 2023 tentang Tata Cara Pembayaran Klaim",
-    level: "Peraturan Turunan",
-    pasal: "Pasal 4",
-    isi: "Persyaratan simpanan yang layak dibayar meliputi: (a) simpanan tercatat dalam pembukuan bank; (b) tingkat bunga simpanan tidak melebihi tingkat bunga penjaminan; (c) simpanan tidak merupakan hasil kejahatan. Verifikasi dilakukan dalam 90 hari kerja.",
-    kata_kunci: ["syarat klaim", "bunga penjaminan", "verifikasi", "pembukuan bank"]
-  },
-  {
-    id: "PLPS-009",
-    judul: "Peraturan Dewan Komisioner LPS Nomor 7 Tahun 2023 tentang Pelaporan Bank Peserta",
-    level: "Peraturan Turunan",
-    pasal: "Pasal 2",
-    isi: "Bank peserta penjaminan wajib menyampaikan laporan data simpanan kepada LPS setiap bulan, paling lambat tanggal 15 bulan berikutnya. Laporan disampaikan secara elektronik melalui sistem informasi LPS.",
-    kata_kunci: ["pelaporan", "bank peserta", "data simpanan", "bulanan", "sistem informasi"]
-  },
-  {
-    id: "PLPS-010",
-    judul: "Surat Edaran LPS Nomor 1 Tahun 2023 tentang Pedoman Penulisan Peraturan",
-    level: "Surat Edaran",
-    pasal: "Bagian I",
-    isi: "Penulisan peraturan di lingkungan LPS harus mengikuti kaidah bahasa Indonesia yang baik dan benar sesuai Pedoman Umum Ejaan Bahasa Indonesia (PUEBI). Setiap peraturan harus konsisten dalam penggunaan istilah, singkatan, dan definisi yang telah ditetapkan dalam peraturan induk.",
-    kata_kunci: ["penulisan", "bahasa Indonesia", "PUEBI", "konsistensi", "istilah"]
-  },
-  {
-    id: "PLPS-011",
-    judul: "Surat Edaran LPS Nomor 1 Tahun 2023 tentang Pedoman Penulisan Peraturan",
-    level: "Surat Edaran",
-    pasal: "Bagian II",
-    isi: "Struktur peraturan LPS terdiri dari: (1) Judul; (2) Pembukaan yang meliputi frasa pembuka, dasar hukum, dan diktum; (3) Batang tubuh yang meliputi ketentuan umum, materi pokok, dan ketentuan penutup; (4) Penutup; (5) Lampiran jika diperlukan. Penomoran pasal menggunakan angka Arab.",
-    kata_kunci: ["struktur peraturan", "judul", "batang tubuh", "pasal", "penomoran"]
-  },
-  {
-    id: "PLPS-012",
-    judul: "UU Nomor 24 Tahun 2004 tentang Lembaga Penjamin Simpanan",
-    level: "Undang-Undang (Acuan)",
-    pasal: "Pasal 4",
-    isi: "LPS berfungsi: (a) menjamin simpanan nasabah penyimpan; dan (b) turut aktif dalam memelihara stabilitas sistem perbankan sesuai dengan kewenangannya. LPS adalah badan hukum yang dibentuk berdasarkan Undang-Undang ini.",
-    kata_kunci: ["fungsi LPS", "badan hukum", "stabilitas perbankan", "UU LPS"]
-  }
+// ── STOP WORDS ────────────────────────────────────────────────────────────────
+const STOP = new Set([
+  "yang","dan","di","ke","dari","dengan","untuk","dalam","adalah","atau","pada",
+  "ini","itu","tidak","dapat","akan","telah","sesuai","oleh","sebagai","serta",
+  "juga","tersebut","yaitu","maupun","bahwa","setiap","paling","bagi","antara",
+  "atas","bawah","maka","tentang","hal","cara","lebih","satu","dua","tiga",
+  "meliputi","melakukan","menyampaikan","dilakukan","ditetapkan","termasuk",
+  "merupakan","memiliki","kepada","dimaksud","nomor","tahun","ayat","huruf",
+  "angka","undang","peraturan","ketentuan","umum","sebesar","persen","sampai",
+  "berupa","melalui","setelah","sejak","apabila","berdasarkan","seluruh","semua",
+  "beberapa","suatu","dimana","ketika","masing","perlu","wajib","harus","boleh",
+  "tetap","pasal","lain","pihak","paling","lambat","saat","masa","jika","maka"
+]);
+
+// ── ISTILAH PENTING PERBANKAN & LPS ──────────────────────────────────────────
+const ISTILAH = [
+  "simpanan","nasabah","penyimpan","bank","penjaminan","lps","premi","klaim",
+  "deposito","giro","tabungan","sertifikat","bunga","modal","izin","usaha",
+  "pencabutan","resolusi","rekonsiliasi","verifikasi","likuidasi","sistemik",
+  "peserta","kontribusi","kepesertaan","laporan","saldo","rekening","valuta",
+  "asing","rupiah","agunan","kredit","denda","keterlambatan","sanksi","pembayaran",
+  "pengalihan","aset","kewajiban","penggabungan","peleburan","pengambilalihan",
+  "penyertaan","stabilitas","perbankan","keuangan","periode","koreksi","pelaporan",
+  "bersama","tindak","pidana","pembukuan","pengumuman","tingkat","fasilitas",
+  "layanan","produk","transaksi","dana","investasi","portofolio","risiko",
+  "kepatuhan","tata","kelola","audit","pengawasan","otoritas","regulator"
 ];
 
-function cariPeraturanRelevan(teksInput, topN = 4) {
-  const teksLower = teksInput.toLowerCase();
-  const kataInput = new Set(teksLower.match(/\b\w{3,}\b/g) || []);
-  const skor = [];
+// ── AUTO EKSTRAK KATA KUNCI ───────────────────────────────────────────────────
+function ekstrakKataKunci(isi, judul) {
+  const teks = ((judul || "") + " " + (isi || "")).toLowerCase();
+  const hasil = new Set();
 
-  for (const peraturan of PERATURAN_LPS) {
-    const kataKunciLower = peraturan.kata_kunci.map(k => k.toLowerCase());
-    const isiLower = peraturan.isi.toLowerCase();
-    const judulLower = peraturan.judul.toLowerCase();
-
-    const skorKunci = kataKunciLower.filter(k => teksLower.includes(k)).length;
-    const skorIsi = [...kataInput].filter(k => isiLower.includes(k) || judulLower.includes(k)).length;
-    const total = skorKunci * 2 + skorIsi;
-
-    if (total > 0) skor.push({ total, peraturan });
+  // 1. Cocokkan istilah penting
+  for (const ist of ISTILAH) {
+    if (teks.includes(ist)) hasil.add(ist);
   }
 
-  skor.sort((a, b) => b.total - a.total);
+  // 2. Kata yang muncul ≥2x dan bukan stop word
+  const kata = teks.match(/\b[a-z]{4,}\b/g) || [];
+  const freq = {};
+  for (const k of kata) {
+    if (!STOP.has(k)) freq[k] = (freq[k] || 0) + 1;
+  }
+  for (const [k, f] of Object.entries(freq)) {
+    if (f >= 2) hasil.add(k);
+  }
 
-  return skor.slice(0, topN).map(({ total, peraturan }) => ({
-    ...peraturan,
-    relevance: total >= 4 ? "Tinggi" : total >= 2 ? "Sedang" : "Rendah",
-    skor: total
-  }));
+  // 3. Semua kata dari judul pasal (selalu relevan)
+  const judulKata = (judul || "").toLowerCase().match(/\b[a-z]{4,}\b/g) || [];
+  for (const k of judulKata) {
+    if (!STOP.has(k)) hasil.add(k);
+  }
+
+  return [...hasil].slice(0, 20);
 }
 
+// ── MUAT DATABASE DARI peraturan.json ────────────────────────────────────────
+let DB = null;
+
+async function muatDB() {
+  if (DB) return DB;
+
+  try {
+    // Coba baca dari file lokal (Netlify Functions bisa akses public/)
+    const path = new URL("../../public/peraturan.json", import.meta.url);
+    const res  = await fetch(path);
+    const json = await res.json();
+
+    // Support 2 format: { pasal: [...] } atau { peraturan: [...] }
+    let semuaPasal = [];
+
+    if (json.pasal) {
+      // Format hasil Apps Script: { pasal: [{id, pasal, judul_pasal, isi, ...}] }
+      semuaPasal = json.pasal.map(p => ({
+        id             : p.id || `P-${Math.random().toString(36).slice(2)}`,
+        id_peraturan   : p.id_peraturan || p.id?.split('-P')[0] || "UNKNOWN",
+        judul_peraturan: p.judul_peraturan || p.id_peraturan || p.id?.split('-P')[0] || "Peraturan LPS",
+        singkatan      : p.singkatan || p.id_peraturan || "",
+        level          : p.level || "Peraturan LPS",
+        pasal          : p.pasal || "",
+        judul_pasal    : p.judul_pasal || "",
+        isi            : p.isi || "",
+        kata_kunci     : p.kata_kunci?.length ? p.kata_kunci : ekstrakKataKunci(p.isi, p.judul_pasal)
+      }));
+
+    } else if (json.peraturan) {
+      // Format lama: { peraturan: [{id, judul, pasal: [...]}] }
+      for (const per of json.peraturan) {
+        for (const p of per.pasal) {
+          semuaPasal.push({
+            id             : p.id,
+            id_peraturan   : per.id,
+            judul_peraturan: per.judul,
+            singkatan      : per.singkatan || per.id,
+            level          : per.level,
+            pasal          : p.pasal,
+            judul_pasal    : p.judul_pasal || "",
+            isi            : p.isi,
+            kata_kunci     : ekstrakKataKunci(p.isi, p.judul_pasal)
+          });
+        }
+      }
+    }
+
+    DB = semuaPasal;
+    return DB;
+
+  } catch (err) {
+    console.error("Gagal muat DB:", err);
+    return [];
+  }
+}
+
+// ── SCORING RELEVANSI ─────────────────────────────────────────────────────────
+function skorRelevansi(pasal, query) {
+  const q    = query.toLowerCase();
+  const kata = new Set((q.match(/\b\w{4,}\b/g) || []));
+  let skor   = 0;
+
+  // Cocok kata kunci (bobot 3)
+  for (const k of pasal.kata_kunci) {
+    if (q.includes(k.toLowerCase())) skor += 3;
+  }
+
+  // Cocok isi (bobot 1.5)
+  const isiL = pasal.isi.toLowerCase();
+  for (const k of kata) {
+    if (isiL.includes(k)) skor += 1.5;
+  }
+
+  // Cocok judul pasal (bobot 4)
+  const judulL = (pasal.judul_pasal || "").toLowerCase();
+  for (const k of kata) {
+    if (judulL.includes(k)) skor += 4;
+  }
+
+  // Cocok judul peraturan (bobot 2)
+  const perL = (pasal.judul_peraturan || "").toLowerCase();
+  for (const k of kata) {
+    if (perL.includes(k)) skor += 2;
+  }
+
+  return Math.round(skor * 10) / 10;
+}
+
+function cariPasal(query, topN = 6) {
+  if (!DB?.length) return [];
+
+  return DB
+    .map(p => ({ ...p, skor: skorRelevansi(p, query) }))
+    .filter(p => p.skor > 0)
+    .sort((a, b) => b.skor - a.skor)
+    .slice(0, topN)
+    .map(p => ({
+      ...p,
+      relevance: p.skor >= 10 ? "Tinggi" : p.skor >= 5 ? "Sedang" : "Rendah"
+    }));
+}
+
+// ── SYSTEM PROMPTS ────────────────────────────────────────────────────────────
 const PROMPTS = {
-  penulisan: `Anda adalah asisten penulisan peraturan LPS (Lembaga Penjamin Simpanan) Indonesia yang ahli.
+  penulisan: `Anda adalah asisten penulisan peraturan LPS (Lembaga Penjamin Simpanan) Indonesia yang ahli dalam hukum perbankan dan teknik perundang-undangan.
+
 Tugas Anda membantu penulis peraturan dengan:
 1. Memperbaiki konsistensi bahasa dan istilah sesuai peraturan LPS yang sudah ada
-2. Memastikan struktur penulisan sesuai Surat Edaran LPS tentang Pedoman Penulisan
+2. Memastikan struktur penulisan sesuai teknik perundang-undangan Indonesia (UU No. 12/2011)
 3. Menggunakan bahasa hukum Indonesia yang baku dan tepat
-4. Menjaga konsistensi definisi dengan peraturan induk
+4. Menjaga konsistensi definisi dengan peraturan yang hierarkinya lebih tinggi
 
-Berikan saran perbaikan konkret dengan penjelasan MENGAPA perlu diperbaiki, dan contoh kalimat yang sudah diperbaiki.
-Gunakan format yang jelas. Bahasa respons: Indonesia.`,
+Format respons:
+**Saran Perbaikan**: jelaskan apa yang perlu diperbaiki dan MENGAPA
+**Versi Perbaikan**: berikan kalimat/pasal yang sudah diperbaiki
+**Dasar Acuan**: sebutkan pasal/peraturan yang menjadi acuan
 
-  referensi: `Anda adalah asisten riset peraturan LPS (Lembaga Penjamin Simpanan) Indonesia yang ahli.
-Bantu penulis peraturan mengidentifikasi peraturan yang relevan sebagai referensi. Jelaskan:
-1. Mengapa setiap peraturan tersebut relevan
-2. Aspek spesifik yang perlu diperhatikan
-3. Potensi konflik atau hal yang perlu diselaraskan
-Berikan analisis yang actionable dan spesifik. Bahasa respons: Indonesia.`,
+Bahasa respons: Indonesia formal.`,
 
-  tanya: `Anda adalah analis peraturan LPS (Lembaga Penjamin Simpanan) Indonesia yang ahli.
-Jawab pertanyaan tentang peraturan LPS berdasarkan konteks yang diberikan. Berikan jawaban yang:
-- Akurat berdasarkan konteks peraturan yang tersedia
-- Menyebutkan nomor pasal/peraturan yang relevan
-- Menjelaskan implikasi praktis jika ada
-Jika informasi tidak ada dalam konteks, katakan bahwa data terbatas pada prototype ini. Bahasa respons: Indonesia.`
+  referensi: `Anda adalah analis hukum peraturan LPS (Lembaga Penjamin Simpanan) Indonesia yang ahli.
+
+Tugas Anda mengidentifikasi peraturan yang harus dijadikan referensi/acuan saat membuat peraturan baru.
+
+Format respons:
+**Peraturan Wajib Diacu**: peraturan yang HARUS dicantumkan sebagai dasar hukum
+**Peraturan Terkait**: peraturan yang perlu diharmonisasikan
+**Potensi Konflik**: aspek yang perlu diselaraskan
+**Hierarki**: urutan dari tertinggi ke terendah
+
+Bahasa respons: Indonesia formal.`,
+
+  tanya: `Anda adalah narasumber ahli peraturan LPS (Lembaga Penjamin Simpanan) Indonesia.
+
+Jawab pertanyaan berdasarkan konteks peraturan yang diberikan dengan:
+- Jawaban langsung dan jelas
+- Menyebut nomor pasal dan nama peraturan yang menjadi sumber
+- Penjelasan praktis/implikasi jika relevan
+- Jika informasi tidak tersedia, nyatakan dengan jelas
+
+Bahasa respons: Indonesia.`
 };
 
+// ── NETLIFY HANDLER ───────────────────────────────────────────────────────────
 export const handler = async (event) => {
-  if (event.httpMethod !== "POST") {
-    return { statusCode: 405, body: "Method Not Allowed" };
-  }
+  const headers = {
+    "Content-Type": "application/json",
+    "Access-Control-Allow-Origin": "*",
+    "Access-Control-Allow-Headers": "Content-Type",
+    "Access-Control-Allow-Methods": "POST, OPTIONS"
+  };
+
+  if (event.httpMethod === "OPTIONS") return { statusCode: 200, headers };
+  if (event.httpMethod !== "POST")    return { statusCode: 405, body: "Method Not Allowed" };
 
   const apiKey = process.env.ANTHROPIC_API_KEY;
-  if (!apiKey) {
-    return {
-      statusCode: 500,
-      body: JSON.stringify({ error: "API key belum dikonfigurasi di Netlify." })
-    };
-  }
+  if (!apiKey) return {
+    statusCode: 500, headers,
+    body: JSON.stringify({ error: "ANTHROPIC_API_KEY belum dikonfigurasi di Netlify." })
+  };
 
   let body;
-  try {
-    body = JSON.parse(event.body);
-  } catch {
-    return { statusCode: 400, body: JSON.stringify({ error: "Request tidak valid." }) };
-  }
+  try { body = JSON.parse(event.body); }
+  catch { return { statusCode: 400, headers, body: JSON.stringify({ error: "Request tidak valid." }) }; }
 
   const { teks, mode } = body;
-  if (!teks || !mode) {
-    return { statusCode: 400, body: JSON.stringify({ error: "Teks dan mode diperlukan." }) };
-  }
+  if (!teks?.trim() || !mode) return {
+    statusCode: 400, headers,
+    body: JSON.stringify({ error: "Teks dan mode diperlukan." })
+  };
 
-  const peraturanRelevan = cariPeraturanRelevan(teks, 4);
-  const konteks = peraturanRelevan.length > 0
-    ? peraturanRelevan.map(p => `[${p.id}] ${p.judul} — ${p.pasal}\nLevel: ${p.level}\nIsi: ${p.isi}`).join("\n\n")
-    : "Tidak ditemukan peraturan yang spesifik relevan dalam database prototype ini.";
+  // Muat DB & cari pasal relevan
+  const db    = await muatDB();
+  const pasal = cariPasal(teks, 6);
+
+  const konteks = pasal.length > 0
+    ? pasal.map(p =>
+        `[${p.id}] ${p.judul_peraturan} — ${p.pasal}` +
+        (p.judul_pasal ? `: ${p.judul_pasal}` : "") + "\n" +
+        `Level: ${p.level} | Skor: ${p.skor}\n` +
+        `Isi: ${p.isi}`
+      ).join("\n\n---\n\n")
+    : "Tidak ditemukan pasal yang relevan dalam database.";
 
   const promptUser = {
-    penulisan: `Peraturan relevan dalam database LPS:\n\n${konteks}\n\n---\nTeks yang perlu diperiksa:\n${teks}\n\nBerikan saran perbaikan penulisan yang spesifik.`,
-    referensi: `Peraturan dalam database LPS:\n\n${konteks}\n\n---\nTopik/draf peraturan:\n${teks}\n\nJelaskan relevansi setiap peraturan tersebut.`,
-    tanya: `Konteks peraturan LPS:\n\n${konteks}\n\n---\nPertanyaan: ${teks}\n\nJawab berdasarkan konteks di atas.`
+    penulisan:
+      `KONTEKS PERATURAN LPS (${pasal.length} pasal relevan dari ${db.length} total):\n\n${konteks}\n\n---\n` +
+      `TEKS YANG PERLU DIPERIKSA:\n${teks}\n\nBerikan saran perbaikan yang spesifik.`,
+    referensi:
+      `PERATURAN LPS YANG RELEVAN (${pasal.length} pasal dari ${db.length} total):\n\n${konteks}\n\n---\n` +
+      `TOPIK PERATURAN YANG DIBUAT:\n${teks}\n\nIdentifikasi peraturan acuan dan potensi konflik.`,
+    tanya:
+      `KONTEKS PERATURAN LPS (${pasal.length} pasal relevan dari ${db.length} total):\n\n${konteks}\n\n---\n` +
+      `PERTANYAAN:\n${teks}`
   }[mode];
 
   try {
-    const response = await fetch("https://api.anthropic.com/v1/messages", {
+    const res = await fetch("https://api.anthropic.com/v1/messages", {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
@@ -194,28 +260,30 @@ export const handler = async (event) => {
         "anthropic-version": "2023-06-01"
       },
       body: JSON.stringify({
-        model: "claude-sonnet-4-6",
-        max_tokens: 2048,
-        system: PROMPTS[mode],
-        messages: [{ role: "user", content: promptUser }]
+        model      : "claude-sonnet-4-6",
+        max_tokens : 2048,
+        system     : PROMPTS[mode],
+        messages   : [{ role: "user", content: promptUser }]
       })
     });
 
-    const data = await response.json();
-    if (!response.ok) throw new Error(data.error?.message || "API error");
+    const data = await res.json();
+    if (!res.ok) throw new Error(data.error?.message || "API error");
 
     return {
-      statusCode: 200,
-      headers: { "Content-Type": "application/json" },
+      statusCode: 200, headers,
       body: JSON.stringify({
-        respons: data.content[0].text,
-        referensi: peraturanRelevan
+        respons             : data.content[0].text,
+        referensi           : pasal,
+        total_pasal_dicari  : db.length,
+        info_database       : `Database: ${db.length} pasal aktif`
       })
     };
+
   } catch (err) {
     return {
-      statusCode: 500,
-      body: JSON.stringify({ error: err.message })
+      statusCode: 500, headers,
+      body: JSON.stringify({ error: "Error AI: " + err.message })
     };
   }
 };
