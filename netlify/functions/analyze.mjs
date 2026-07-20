@@ -164,37 +164,30 @@ Jawab pertanyaan berdasarkan konteks peraturan yang diberikan dengan:
 Bahasa respons: Indonesia.`
 };
 
-// ── GEMINI API ────────────────────────────────────────────────────────────────
-async function panggilGemini(sistemPrompt, userPrompt, apiKey) {
-  // Gabungkan sistem prompt ke dalam pesan user (Gemini tidak punya system role terpisah)
-  const gabungan = sistemPrompt + "\n\n" + userPrompt;
-
-  const url = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=${apiKey}`;
-
-  const res = await fetch(url, {
+// ── GROQ API ──────────────────────────────────────────────────────────────────
+async function panggilGroq(sistemPrompt, userPrompt, apiKey) {
+  const res = await fetch("https://api.groq.com/openai/v1/chat/completions", {
     method: "POST",
-    headers: { "Content-Type": "application/json" },
+    headers: {
+      "Content-Type" : "application/json",
+      "Authorization": `Bearer ${apiKey}`
+    },
     body: JSON.stringify({
-      contents: [{
-        role: "user",
-        parts: [{ text: gabungan }]
-      }],
-      generationConfig: {
-        temperature    : 0.3,
-        maxOutputTokens: 2048
-      }
+      model      : "llama-3.3-70b-versatile",  // model gratis terbaik di Groq
+      temperature: 0.3,
+      max_tokens : 2048,
+      messages   : [
+        { role: "system", content: sistemPrompt },
+        { role: "user",   content: userPrompt   }
+      ]
     })
   });
 
   const data = await res.json();
+  if (!res.ok) throw new Error(data.error?.message || JSON.stringify(data));
 
-  if (!res.ok) {
-    const msg = data.error?.message || JSON.stringify(data);
-    throw new Error(msg);
-  }
-
-  const teks = data.candidates?.[0]?.content?.parts?.[0]?.text;
-  if (!teks) throw new Error("Gemini tidak mengembalikan respons.");
+  const teks = data.choices?.[0]?.message?.content;
+  if (!teks) throw new Error("Groq tidak mengembalikan respons.");
   return teks;
 }
 
@@ -210,10 +203,10 @@ export const handler = async (event) => {
   if (event.httpMethod === "OPTIONS") return { statusCode: 200, headers };
   if (event.httpMethod !== "POST")    return { statusCode: 405, body: "Method Not Allowed" };
 
-  const apiKey = process.env.GEMINI_API_KEY;
+  const apiKey = process.env.GROQ_API_KEY;
   if (!apiKey) return {
     statusCode: 500, headers,
-    body: JSON.stringify({ error: "GEMINI_API_KEY belum dikonfigurasi di Netlify Environment Variables." })
+    body: JSON.stringify({ error: "GROQ_API_KEY belum dikonfigurasi di Netlify Environment Variables." })
   };
 
   let body;
@@ -251,20 +244,20 @@ export const handler = async (event) => {
   }[mode];
 
   try {
-    const respons = await panggilGemini(PROMPTS[mode], promptUser, apiKey);
+    const respons = await panggilGroq(PROMPTS[mode], promptUser, apiKey);
     return {
       statusCode: 200, headers,
       body: JSON.stringify({
         respons,
-        referensi          : pasal,
-        total_pasal_dicari : db.length,
-        info_database      : `Database: ${db.length} pasal aktif · Ditenagai Gemini AI`
+        referensi         : pasal,
+        total_pasal_dicari: db.length,
+        info_database     : `Database: ${db.length} pasal aktif · Ditenagai Llama 3 (Groq)`
       })
     };
   } catch (err) {
     return {
       statusCode: 500, headers,
-      body: JSON.stringify({ error: "Error Gemini AI: " + err.message })
+      body: JSON.stringify({ error: "Error Groq AI: " + err.message })
     };
   }
 };
