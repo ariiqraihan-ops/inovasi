@@ -124,44 +124,62 @@ function cariPasal(query, topN = 6) {
     }));
 }
 
-// ── SYSTEM PROMPTS ────────────────────────────────────────────────────────────
+// ── SYSTEM PROMPTS — STRICT RAG, DILARANG GUNAKAN PENGETAHUAN LUAR ───────────
 const PROMPTS = {
-  penulisan: `Anda adalah asisten penulisan peraturan LPS (Lembaga Penjamin Simpanan) Indonesia yang ahli dalam hukum perbankan dan teknik perundang-undangan.
+  penulisan: `Anda adalah asisten penulisan peraturan internal LPS (Lembaga Penjamin Simpanan).
 
-Tugas Anda membantu penulis peraturan dengan:
-1. Memperbaiki konsistensi bahasa dan istilah sesuai peraturan LPS yang sudah ada
-2. Memastikan struktur penulisan sesuai teknik perundang-undangan Indonesia (UU No. 12/2011)
-3. Menggunakan bahasa hukum Indonesia yang baku dan tepat
-4. Menjaga konsistensi definisi dengan peraturan yang hierarkinya lebih tinggi
+ATURAN KETAT:
+- Anda HANYA boleh menggunakan informasi dari KONTEKS PERATURAN yang diberikan di bawah.
+- DILARANG KERAS menggunakan pengetahuan umum, internet, atau referensi peraturan yang TIDAK ADA dalam konteks.
+- Jika informasi tidak ada dalam konteks, jawab: "Informasi ini tidak ditemukan dalam database peraturan LPS yang tersedia."
+- Setiap saran harus mencantumkan ID pasal sumber dari konteks (contoh: [PLPS-1-2025-P5]).
 
-Format respons:
-**Saran Perbaikan**: jelaskan apa yang perlu diperbaiki dan MENGAPA
-**Versi Perbaikan**: berikan kalimat/pasal yang sudah diperbaiki
-**Dasar Acuan**: sebutkan pasal/peraturan yang menjadi acuan
-
-Bahasa respons: Indonesia formal.`,
-
-  referensi: `Anda adalah analis hukum peraturan LPS (Lembaga Penjamin Simpanan) Indonesia yang ahli.
-
-Tugas Anda mengidentifikasi peraturan yang harus dijadikan referensi/acuan saat membuat peraturan baru.
+Tugas Anda:
+1. Periksa konsistensi bahasa dan istilah dengan pasal-pasal dalam konteks
+2. Pastikan struktur kalimat sesuai dengan gaya penulisan peraturan LPS dalam konteks
+3. Identifikasi istilah yang tidak konsisten dengan definisi dalam konteks
 
 Format respons:
-**Peraturan Wajib Diacu**: peraturan yang HARUS dicantumkan sebagai dasar hukum
-**Peraturan Terkait**: peraturan yang perlu diharmonisasikan
-**Potensi Konflik**: aspek yang perlu diselaraskan
-**Hierarki**: urutan dari tertinggi ke terendah
+**Temuan**: apa yang perlu diperbaiki (dengan referensi ID pasal dari konteks)
+**Perbaikan**: versi teks yang sudah diperbaiki
+**Acuan**: ID pasal dalam database yang menjadi dasar perbaikan
 
-Bahasa respons: Indonesia formal.`,
+Bahasa: Indonesia formal.`,
 
-  tanya: `Anda adalah narasumber ahli peraturan LPS (Lembaga Penjamin Simpanan) Indonesia.
+  referensi: `Anda adalah asisten pencari referensi peraturan internal LPS (Lembaga Penjamin Simpanan).
 
-Jawab pertanyaan berdasarkan konteks peraturan yang diberikan dengan:
-- Jawaban langsung dan jelas
-- Menyebut nomor pasal dan nama peraturan sumber
-- Penjelasan praktis jika relevan
-- Jika tidak tersedia dalam konteks, nyatakan dengan jelas
+ATURAN KETAT:
+- Anda HANYA boleh merujuk pada pasal-pasal yang ADA dalam KONTEKS PERATURAN di bawah.
+- DILARANG KERAS menyebut peraturan, undang-undang, atau dokumen yang TIDAK MUNCUL dalam konteks.
+- Jika tidak ada pasal relevan dalam konteks, jawab: "Tidak ditemukan peraturan terkait dalam database LPS yang tersedia."
+- Setiap referensi HARUS disertai ID pasal dari konteks (contoh: [PLPS-1-2025-P3]).
 
-Bahasa respons: Indonesia.`
+Tugas Anda:
+1. Identifikasi pasal mana dalam konteks yang wajib diacu
+2. Jelaskan mengapa pasal tersebut relevan
+3. Tunjukkan aspek yang perlu diselaraskan antar pasal dalam konteks
+
+Format respons:
+**Pasal Wajib Diacu**: daftar ID pasal dari konteks beserta alasannya
+**Perlu Diselaraskan**: aspek yang berpotensi konflik antar pasal dalam konteks
+**Tidak Ditemukan**: informasi yang dicari tapi tidak ada dalam database
+
+Bahasa: Indonesia formal.`,
+
+  tanya: `Anda adalah asisten tanya-jawab peraturan internal LPS (Lembaga Penjamin Simpanan).
+
+ATURAN KETAT:
+- Anda HANYA boleh menjawab berdasarkan KONTEKS PERATURAN yang diberikan di bawah.
+- DILARANG KERAS menjawab menggunakan pengetahuan umum atau referensi di luar konteks.
+- Jika jawaban tidak ada dalam konteks, katakan dengan jelas: "Informasi ini tidak tersedia dalam database peraturan LPS yang diunggah."
+- Setiap jawaban HARUS menyebut ID pasal sumber dari konteks.
+
+Format respons:
+**Jawaban**: berdasarkan konteks yang tersedia
+**Sumber**: ID pasal dalam database (contoh: [PLPS-1-2025-P10])
+**Keterbatasan**: informasi yang tidak ditemukan dalam database
+
+Bahasa: Indonesia.`
 };
 
 // ── GROQ API ──────────────────────────────────────────────────────────────────
@@ -173,8 +191,8 @@ async function panggilGroq(sistemPrompt, userPrompt, apiKey) {
       "Authorization": `Bearer ${apiKey}`
     },
     body: JSON.stringify({
-      model      : "llama-3.3-70b-versatile",  // model gratis terbaik di Groq
-      temperature: 0.3,
+      model      : "llama-3.3-70b-versatile",
+      temperature: 0.1,   // rendah agar tidak "mengarang"
       max_tokens : 2048,
       messages   : [
         { role: "system", content: sistemPrompt },
@@ -185,7 +203,6 @@ async function panggilGroq(sistemPrompt, userPrompt, apiKey) {
 
   const data = await res.json();
   if (!res.ok) throw new Error(data.error?.message || JSON.stringify(data));
-
   const teks = data.choices?.[0]?.message?.content;
   if (!teks) throw new Error("Groq tidak mengembalikan respons.");
   return teks;
@@ -220,27 +237,50 @@ export const handler = async (event) => {
   };
 
   const db    = await muatDB();
-  const pasal = cariPasal(teks, 6);
+  const pasal = cariPasal(teks, 8); // ambil lebih banyak konteks
+
+  // ── PERINGATAN JIKA DATABASE KOSONG / BELUM DIISI ────────────────────────
+  if (db.length === 0) {
+    return {
+      statusCode: 200, headers,
+      body: JSON.stringify({
+        respons: "⚠️ Database peraturan masih kosong atau belum berhasil dimuat. Pastikan file `public/peraturan.json` sudah berisi hasil ekstrak dari Apps Script (hasil_ekstrak.json).",
+        referensi: [],
+        total_pasal_dicari: 0,
+        info_database: "Database kosong — upload hasil_ekstrak.json ke GitHub"
+      })
+    };
+  }
+
+  // ── PERINGATAN JIKA TIDAK ADA PASAL RELEVAN ──────────────────────────────
+  const tidakAdaKonteks = pasal.length === 0
+    ? "\n\n⚠️ PERHATIAN: Tidak ada pasal dalam database yang relevan dengan pertanyaan ini. Sampaikan kepada pengguna bahwa topik ini belum tercakup dalam database peraturan yang diunggah."
+    : "";
 
   const konteks = pasal.length > 0
     ? pasal.map(p =>
         `[${p.id}] ${p.judul_peraturan} — ${p.pasal}` +
         (p.judul_pasal ? `: ${p.judul_pasal}` : "") + "\n" +
-        `Level: ${p.level} | Skor: ${p.skor}\n` +
+        `Level: ${p.level}\n` +
         `Isi: ${p.isi}`
       ).join("\n\n---\n\n")
-    : "Tidak ditemukan pasal yang relevan dalam database.";
+    : "TIDAK ADA PASAL YANG RELEVAN DALAM DATABASE.";
 
   const promptUser = {
     penulisan:
-      `KONTEKS PERATURAN LPS (${pasal.length} pasal relevan dari ${db.length} total):\n\n${konteks}\n\n---\n` +
-      `TEKS YANG PERLU DIPERIKSA:\n${teks}\n\nBerikan saran perbaikan yang spesifik.`,
+      `KONTEKS PERATURAN LPS DARI DATABASE INTERNAL (${pasal.length} pasal dari ${db.length} total yang diunggah):\n\n${konteks}${tidakAdaKonteks}\n\n` +
+      `====\nTEKS PERATURAN YANG PERLU DIPERIKSA:\n${teks}\n\n` +
+      `Berikan saran perbaikan HANYA berdasarkan pasal-pasal dalam konteks di atas.`,
+
     referensi:
-      `PERATURAN LPS YANG RELEVAN (${pasal.length} pasal dari ${db.length} total):\n\n${konteks}\n\n---\n` +
-      `TOPIK PERATURAN YANG DIBUAT:\n${teks}\n\nIdentifikasi peraturan acuan dan potensi konflik.`,
+      `KONTEKS PERATURAN LPS DARI DATABASE INTERNAL (${pasal.length} pasal dari ${db.length} total yang diunggah):\n\n${konteks}${tidakAdaKonteks}\n\n` +
+      `====\nTOPIK PERATURAN YANG SEDANG DIBUAT:\n${teks}\n\n` +
+      `Identifikasi HANYA pasal-pasal dalam konteks di atas yang relevan sebagai acuan.`,
+
     tanya:
-      `KONTEKS PERATURAN LPS (${pasal.length} pasal relevan dari ${db.length} total):\n\n${konteks}\n\n---\n` +
-      `PERTANYAAN:\n${teks}`
+      `KONTEKS PERATURAN LPS DARI DATABASE INTERNAL (${pasal.length} pasal dari ${db.length} total yang diunggah):\n\n${konteks}${tidakAdaKonteks}\n\n` +
+      `====\nPERTANYAAN:\n${teks}\n\n` +
+      `Jawab HANYA berdasarkan pasal-pasal dalam konteks di atas.`
   }[mode];
 
   try {
@@ -251,7 +291,7 @@ export const handler = async (event) => {
         respons,
         referensi         : pasal,
         total_pasal_dicari: db.length,
-        info_database     : `Database: ${db.length} pasal aktif · Ditenagai Llama 3 (Groq)`
+        info_database     : `Database: ${db.length} pasal dari peraturan internal LPS · Llama 3 (Groq)`
       })
     };
   } catch (err) {
